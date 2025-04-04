@@ -487,10 +487,10 @@ def test_results_json(test, player):
 
     for question in test.questions:
         answers_json = []
-        question_json = dict(answers=answers_json)
+        question_json = dict(contents=question.contents, multi_choice=question.multi_choice, answers=answers_json)
 
         for answer in question.answers:
-            answer_json = dict(score=answer.score, picked=answer.toggled)
+            answer_json = dict(contents=answer.contents, score=answer.score, picked=answer.toggled)
             answers_json.append(answer_json)
 
         questions_json.append(question_json)

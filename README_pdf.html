@@ -8,9 +8,6 @@
             body
             {
                 font-family: sans-serif;
-
-                /* margin-left: 200px;
-                margin-right: 200px; */
             }
 
             h1.title
@@ -105,7 +102,7 @@
                 <li><a href="#scoring">Scoring System</a></li>
                 <li><a href="#syntax">FeedBuzz Lingo</a></li>
                 <li><a href="#json">JSON Result Data</a></li>
-                <li><a href="#visions">Future Visions</a></li>
+                <li><a href="#visions">Visions</a></li>
             </ol>
         </section>
 
@@ -184,8 +181,10 @@ feedbuzz [input file] [--output output_file] [--maximum] [--ranges] [--questions
         <header>Presets</header>
         <section id="presets">
             <p>
-                Feedbuzz bundles with general-purpose presets and goodies.
+                Feedbuzz bundles with a few presets, which you can find them at the presets folder.
             </p>
+
+            <h4>presets/</h4>
         </section>
 
         <header>Scoring</header>
@@ -210,7 +209,8 @@ Question "What can be 10?":
     Answer "8 + 2" Gain 1
     Answer "2 + 1" Loss 1 # selected
     Answer "9 + 8" Loss 1 # selected
-    Answer "5 + 7" Loss 1; # selected
+    Answer "5 + 7" Loss 1 # selected
+    ;
 
 # this means the total penalty of 3</pre>
             </p>
@@ -230,7 +230,8 @@ Question "What can be 10?":
     Answer "8 + 2" Gain 1
     Answer "2 + 1" Loss 1 # selected
     Answer "9 + 8" Loss 1 # selected
-    Answer "5 + 7" Loss 1; # selected
+    Answer "5 + 7" Loss 1 # selected
+    ;
 
 # this means no penalty because the test has a sparing deduction mechanic.</pre>
             </p>
@@ -323,7 +324,8 @@ Question "Sample":
 Question "Do you support [insert controversial policy here]?":
     Answer "Yes." Gain 99999
     Answer "No." Loss 0
-    Answer "I prefer not to say." Loss 99999999;
+    Answer "I prefer not to say." Loss 99999999
+    ;
 </pre>
 
         <h4 id="syntax_structure">File Structure</h4>
@@ -566,6 +568,113 @@ Question "What is 1+1?":
                             |
                             The name of the test taken.
                         </li>
+
+                        <li>
+                            <code>description</code>
+                            |
+                            string
+                            |
+                            The description of the test taken.
+                        </li>
+
+                        <li>
+                            <code>time_limit</code>
+                            |
+                            number
+                            |
+                            The time limit of the test taken. (If the time limit is zero, it means there is no time limit.)
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <code>time</code>
+                    <ul>
+                        <li>
+                            <code>started</code>
+                            |
+                            string
+                            |
+                            Date and time of when the test started.
+                        </li>
+                        <li>
+                            <code>finished</code>
+                            |
+                            string
+                            |
+                            Date and time of when the test finished.
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <code>performance</code>
+                    <ul>
+                        <li>
+                            <code>score</code>
+                            |
+                            number
+                            |
+                            The total score the test taker ended up.
+                        </li>
+                        <li>
+                            <code>maximum</code>
+                            |
+                            number
+                            |
+                            The maximum amount of points possible in the test.
+                        </li>
+                        <li>
+                            <code>score_description</code>
+                            |
+                            string
+                            |
+                            The description of a score range relating to the score.
+                        </li>
+                        <li>
+                            <code>overdue</code>
+                            |
+                            boolean
+                            |
+                            If a test taker finished later beyond the time limit.
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <code>questions</code>
+                    |
+                    array
+                    |
+                    An array of questions in the test
+                    <ul>
+                        <li>
+                            <ul>
+                                <li>
+                                    <code>answers</code>
+                                    |
+                                    array
+                                    |
+                                    An array of answers in the question
+                                    <ul>
+                                        <li>
+                                            <code>score</code>
+                                            |
+                                            number
+                                            |
+                                            The reward or penalty of the answer. Negative for penalty, positive for reward.
+                                        </li>
+                                        <li>
+                                            <code>picked</code>
+                                            |
+                                            boolean
+                                            |
+                                            If the test taker has selected the answer.
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -580,18 +689,6 @@ Question "What is 1+1?":
                 To make it user-friendly enough, I have plans to rebuild this with different interfaces to have the same system.
                 For now, this is a passion project made for a family member and for a school project.
             </p>
-        </section>
-
-        <header>Cramming Roadmap</header>
-        <section id="roadmap">
-            <p>Said in days:</p>
-            <ol>
-                <li>Documentation Planning</li>
-                <li>Language Implementation</li>
-                <li>Question Asking</li>
-                <li>Wizard Program</li>
-                <li>Goodies</li>
-            </ol>
         </section>
     </body>
 <html>
