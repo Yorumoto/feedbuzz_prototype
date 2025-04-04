@@ -34,7 +34,8 @@ def question_marked(question):
 
     for answer in question.answers:
         answer_unwrap(answer)
-        return True
+        if answer.toggled:
+            return True
 
     return False
 
@@ -140,7 +141,12 @@ def player_is_overdue(test, player):
     test_unwrap(test)
     player_unwrap(player)
 
-    test_time_limit = timedelta(seconds=test.time_limit)
+    time_limit = test.time_limit
+
+    if time_limit <= 0:
+        return (False, timedelta(seconds=0))
+
+    test_time_limit = timedelta(seconds=time_limit)
     time_taken = player_time_taken(player)
 
     return (player.questions and time_taken > test_time_limit, time_taken -test_time_limit)
@@ -298,6 +304,10 @@ def player_start_anticipation(test):
     
     return False
     
+def clearline():
+    terminal_block(" ")
+    print("\r", end="")
+
 def player_display_question(idx, question):
     question_unwrap(question)
 
@@ -305,16 +315,22 @@ def player_display_question(idx, question):
     contents = question.contents
     multi_choice = question.multi_choice
 
+    clearline()
     terminal_marked(" ")
     terminal_bold(f"{idx+1}. ".rjust(4))
     terminal_bold(" " + contents)
     print()
 
+    clearline()
     if multi_choice:
         terminal_italic("      (multiple-choice)")
         print()
+    else:
+        print()
 
     for idx, answer in enumerate(answers):
+        clearline()
+
         if answer.toggled:
             terminal_marked(f"{idx+1}.".rjust(5))
         else:
@@ -323,6 +339,7 @@ def player_display_question(idx, question):
         print(" ", end="")
         print(answer.contents)
 
+    clearline()
     terminal_italic("Pick or erase with an answer number. Type 'done' if you are done answering.")
     print()
 
@@ -334,10 +351,11 @@ def player_show_statistics(test, player):
     test_unwrap(test)
     player_unwrap(player)
 
-    clear_screen()
     print()
+    terminal_block(">")
+    print("\r", end="")
     terminal_marked("     ")
-    terminal_bold(" Finished!")
+    terminal_bold(" Finished! ")
     print()
     print()
 
@@ -355,8 +373,16 @@ def player_show_statistics(test, player):
 
     terminal_italic(test_score_description(test, player.score))
     print()
+    print()
+
+    terminal_block(">")
+    print()
+    print()
 
     # TODO: remind player of score and time, that's all!
+
+def carriage_up(up=0):
+    print(f"\r\033[{up}A", end="")
 
 def player_confront(test, player):
     player_unwrap(player)
@@ -372,15 +398,22 @@ def player_confront(test, player):
         player_show_statistics(test, player)
         return False
 
+    answerlen = len(answers)
+
     while True:
         try:
             player_display_question(current, question)
-            answer_input = input("Your answer: ").strip().lower()
+            clearline()
+            answer_input = input("\rYour answer: ").strip().lower()
 
             if answer_input == "done":
                 if not question_marked(question):
-                    print("No answers selected.")
-                    pass
+                    clearline()
+                    terminal_bold("!! ")
+                    print("No answers selected, at least pick one answer.")
+
+                    carriage_up(answerlen+5)
+                    continue
 
                 player.current += 1
                 return True
@@ -388,15 +421,29 @@ def player_confront(test, player):
             try:
                 answer_idx = int(answer_input)
             except ValueError:
+                clearline()
+                terminal_bold("!! ")
+
                 print("Not a number.")
+                carriage_up(answerlen+5)
+
                 continue
 
             if answer_idx <= 0:
+                clearline()
+                terminal_bold("!! ")
+
                 print("Answer number exceeds below 1, type blank to see the question again.")
+                carriage_up(answerlen+5)
                 continue
 
             if answer_idx > len(answers):
+                clearline()
+                terminal_bold("!! ")
+
                 print(f"Answer number exceeds above {len(answers)}, type blank to see the question again.")
+                carriage_up(answerlen+5)
+
                 continue
 
             answer = answers[answer_idx - 1]
@@ -408,7 +455,10 @@ def player_confront(test, player):
                 for question_answer in answers:
                     question_answer.toggled = False
                 answer.toggled = True
+
+            carriage_up(answerlen+4)
         except KeyboardInterrupt:
+            terminal_marked(" interrupt detected, quitting test ")
             return False
 
     return False
@@ -422,9 +472,17 @@ def test_results_json(test, player):
 
     score_description = test_score_description(test, player.score)
 
-    metadata = dict(name=test.title, description=test.description, time_limit=test.time_limit)
-    time = dict(started=datetime_json(player.time_start), finished=datetime_json(player.time_finished))
-    performance = dict(score=player.score, maximum=test.maximum_possible, score_description=score_description)
+    overdue, _ = player_is_overdue(test, player)
+
+    metadata = dict(name=test.title, description=test.description, 
+                    time_limit=test.time_limit)
+
+    time = dict(started=datetime_json(player.time_start), 
+                finished=datetime_json(player.time_finished))
+
+    performance = dict(score=player.score, maximum=test.maximum_possible, 
+                       score_description=score_description, overdue=overdue)
+
     questions_json = []
 
     for question in test.questions:

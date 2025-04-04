@@ -10,10 +10,12 @@ from os.path import isfile
 CODENAME = "feedbuzz"
 
 class Opts:
-    def __init__(opts, input="", output="", maximum=False):
+    def __init__(opts, input="", output="", maximum=False, ranges=False, questions=False):
         opts.input = input
         opts.output = output
         opts.maximum = maximum
+        opts.ranges = ranges
+        opts.questions = questions
 
 class OptReadError(Exception):
     pass
@@ -37,8 +39,26 @@ def read_opts(opts, argv):
                 opts.output = get_flag_value(arg, argv_over)
             elif arg == "--maximum":
                 opts.maximum = True
+            elif arg == "--ranges":
+                opts.ranges = True
+            elif arg == "--questions":
+                opts.questions = True
+            elif arg == "--help":
+                raise OptReadError(
+                            "usage\n"
+                            "          [input_file] [--output output_file] [--maximum]\n"
+                            "          [--ranges] [--help]\n"
+                            "\n"
+                            "--output    Specify file path of JSON test reults\n"
+                            "--questions Specify file path of JSON test reults\n"
+                            "--maximum   Get maximum points possible in a test\n"
+                            "--ranges    List all ranges in a test sorted.    \n"
+                            "--help      Show this help message.              \n"
+                            "\n"
+                            "Refer to README.html to get full help.\n"
+                        )
             else:
-                raise OptReadError(f"Unknown flag: {flag_name}")
+                raise OptReadError(f"Unknown flag: {arg}")
 
             continue
 
@@ -106,7 +126,32 @@ def main(argv):
     test.maximum_possible = test_calculate_maximum(test)
 
     if opts.maximum:
-        print(f"The maximum possible achieved in this test is a score of {test.maximum_possible}")
+        print(f"{test.maximum_possible}")
+        return 0
+    elif opts.ranges:
+        if not test.ranges:
+            print("No score ranges in this test.")
+            return 1
+
+        print(f"Score ranges ({len(test.ranges)}):")
+
+        for idx, (scorerange, previous) in enumerate(zip(test.ranges[1:], test.ranges)):
+            print(f"{idx+1}. [{previous.at}~{scorerange.at}] {previous.description}")
+
+        recent = test.ranges[-1]
+        print(f"{len(test.ranges)}. [>={recent.at}] {recent.description}")
+
+        return 0
+    elif opts.questions:
+        if not test.questions:
+            print("No questions in this test.")
+            return 1
+
+        print(f"Questions ({len(test.questions)}):")
+
+        for idx, question in enumerate(test.questions):
+            print(f"{idx+1}. {question.contents}")
+
         return 0
 
     player = FeedBuzzPlayer(test)

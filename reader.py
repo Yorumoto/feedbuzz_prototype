@@ -71,6 +71,8 @@ def read_char_file_safe(state, file, bypass=False):
     return char
 
 def read_char_skip_comments(first_char, state, file, bypass=False, skip_comments=True):
+    if not skip_comments:
+        return first_char
     if first_char != "#":
         return first_char
 
@@ -81,20 +83,33 @@ def read_char_skip_comments(first_char, state, file, bypass=False, skip_comments
             reader_count_newline(state, char)
             return read_char_file_safe(state, file, bypass) # the next character after \n
 
-    return first_char
+    return ""
 
 def read_char_skip_newline(first_char, state, file, bypass=False, skip_whitespace=True):
+    if not skip_whitespace:
+        return first_char
+
+    while True:
+        char = read_char_file_safe(state, file, bypass)
+
+        if not reader_count_newline(state, char):
+            return char
+
+    return ""
 
 def read_char_safe(state, file, bypass=False, skip_whitespace=False, skip_comments=True):
     char = read_char_file_safe(state, file, bypass)
-    char = read_char_skip_comments(char, state, file, bypass, skip_comments)
 
-    if reader_count_newline(state, char) and skip_whitespace:
-        while True:
-            char = read_char_file_safe(state, file, bypass)
+    # print("read_char_safe: skip_whitespace", skip_whitespace, "skip_comments:",skip_comments, "bypass:",bypass)
+    # print("-- first char:", char)
 
-            if not reader_count_newline(state, char):
-                return read_char_skip_comments(char, state, file, bypass, skip_comments)
+    while True:
+        if char == "#" and skip_comments:
+            char = read_char_skip_comments(char, state, file, bypass, skip_comments)
+        elif skip_whitespace and reader_count_newline(state, char):
+            char = read_char_skip_newline(char, state, file, bypass, skip_whitespace)
+        else:
+            return char
 
     return char
 
@@ -218,7 +233,7 @@ def reader_read_test(test, state, file):
         if identifier_is_valid(char):
             keyword = identifier_read(state, file, char)
 
-            if keyword == "Title" or keyword == "Name":
+            if keyword == "Title":
                 title = reader_read_string(state, file, "Test.Title")
                 test.title = title
             elif keyword == "Description":
@@ -367,7 +382,7 @@ def root_nest_identify_keyword(test, state, file, keyword):
         state.scoring_line = state.lineno
         reader_read_scoring(test, state, file)
     else:
-        raise reader_error(state, f"Unrecognized data entry '{keyword}'; Test, Result, or Question expected.")
+        raise reader_error(state, f"Unrecognized data entry '{keyword}'; Test, Scoring, or Question expected.")
 
 def feedbuzz_file_read(test, file):
     state = ReaderState()

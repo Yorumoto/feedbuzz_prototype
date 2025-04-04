@@ -131,27 +131,23 @@
             </p>
 
             <p>
-                <em>Make sure the following source code files are along with <code>main.py</code> in the same folder:</em>
+                <em>Make sure the following source code files are in the same folder:</em>
                 <ol>
+                    <li><code>main.py</code></li>
                     <li><code>reader.py</code></li>
                     <li><code>test.py</code></li>
                 </ol>
-            </p>
-
-            <p>
-            If you want presets and goodies bundled with FeedBuzz, make sure the presets folder is along with <code>main.py</code>
             </p>
         </section>
 
         <header>Usage</header>
         <section id="usage">
             <p>
-                <code>feedbuzz</code> is <code>python main.py</code>. This is assuming if you run it in a directory or a folder containing <code>main.py</code>
+                <code>feedbuzz</code> is <code>python main.py</code> assuming if you run it in a directory or a folder containing <code>main.py</code>
             </p>
 
             <pre>
-feedbuzz [input file] [--output output_file] [--raw] 
-[--preset preset] [--calculate] [--wizard] [--ranges]</pre>
+feedbuzz [input file] [--output output_file] [--maximum] [--ranges] [--questions] [--help]</pre>
 
             <ul>
                 <li>
@@ -166,28 +162,23 @@ feedbuzz [input file] [--output output_file] [--raw]
                 </li>
 
                 <li>
-                    <code>--preset</code>
-                    Load a preset from the `presets`
-                </li>
-
-                <li>
-                    <code>--raw</code>
-                    Only output JSON test result data if you insist.
-                </li>
-
-                <li>
-                    <code>--calculate</code>
-                    Calculate the lowest and highest possible points.
+                    <code>--maximum</code>
+                    Get the maximum possible points achieved in a test.
                 </li>
 
                 <li>
                     <code>--ranges</code>
-                    Load the ranges of the result entries in order.
+                    List all the judgment scoring ranges in a test.
                 </li>
 
                 <li>
-                    <code>--wizard</code>
-                    Activates the <a href="#wizard">test making wizard.</a>
+                    <code>--questions</code>
+                    List all the questions in a test.
+                </li>
+
+                <li>
+                    <code>--help</code>
+                    Show brief help message.
                 </li>
             </ul>
         </section>
@@ -270,18 +261,21 @@ Question "What can be 10?":
             <pre>
 Test:
     Name "Sample Test"
-    TimeLimit 120;
+    TimeLimit 120
+    ;
 
 Scoring:
     At 2 "Good enough I guess."
     At 1 "Cringe"
-    Last "No common sense you have";
+    At 0 "No common sense you have"
+    ;
 
 Question "Which poison would you pick?":
     Choice Single
     Answer "Right" Gain 1
     Answer "Neutral"
-    Answer "Wrong" Loss 99;
+    Answer "Wrong" Loss 99
+    ;
 
 Question "What is not the third color of the rainbow?":
     Choice Multiple
@@ -289,7 +283,8 @@ Question "What is not the third color of the rainbow?":
     Answer "red" Gain 1
     Answer "orange" Gain 1
     Answer "yellow" Loss 1
-    Answer "green" Loss 1</pre>
+    Answer "green" Loss 1
+    ;</pre>
 
         <h4 id="syntax_nested_pattern">Nested Pattern</h4>
 
@@ -297,10 +292,11 @@ Question "What is not the third color of the rainbow?":
         <pre>
 DataName [DataValues]:
     Attribute AttributeValue
-    Attribute2 AttributeValue2;</pre>
+    Attribute2 AttributeValue2
+    ;</pre>
 
         <p>Indicate a colon after the values of data to begin listing attributes. 
-        Indicate a semicolon after the last attribute to stop the attribute list. Although use consistent indentation for 
+        Indicate a semicolon to stop the attribute list. Although use consistent indentation for 
         clear lists when writing attributes, whitespace does not matter when read.
         </p>
 
@@ -315,7 +311,8 @@ DataName [DataValues]:
 Question "Sample":
         Answer 'Foo'
         Answer "Bar"
-        Answer "The duck says, \"Quack!\"";</pre>
+        Answer "The duck says, \"Quack!\""
+        ;</pre>
 
         <h4 id="syntax_comments">Comments</h4>
 
@@ -335,6 +332,8 @@ Question "Do you support [insert controversial policy here]?":
 
         <p>You have only one <code>Test</code> data entry. You are welcome to have as many questions with many answers, as you like.
         You can have as many score-ranged result descriptions as you like. This is all on the same indentation. <em>However,</em> the location of the question entries define the order of the questions. The ranged result descriptions are sorted by the starting point.</p>
+
+        <p>The typical file format of a FeedBuzz Lingo file ends with ".q" standing for questions.<p>
 
         <pre>
 Test:
@@ -373,7 +372,8 @@ Test:
     Name "Test Name"
     Description "Test description"
     Deduction Sparing
-    TimeLimit 0;</pre>
+    TimeLimit 0
+    ;</pre>
 
         <ul>
             <li>
@@ -444,7 +444,8 @@ Test:
 Scoring:
     At 4 "A score at least more than 4 is displayed"
     At 2 "A score at least more than 2 is displayed"
-    Last "A score below anything above is displayed";</pre>
+    At 0 "A score below anything above is displayed"
+    ;</pre>
 
         <ul>
             <li>
@@ -466,12 +467,10 @@ Scoring:
                             </li>
                         </ul>
                     </li>
-                    <li>
-                        <code>Last [description?]</code>
-                    </li>
                 </ul>
             </li>
 
+            <p>You can always look how FeedBuzz is treating the judgment data by running <code>feedbuzz [input file] --ranges</code></p>
         </ul>
 
         <h4 id="syntax_question">Question Entry</h4>
@@ -482,7 +481,8 @@ Scoring:
 # default values when unspecified
 
 Question "[question name placeholder]":
-    Choice Single;</pre>
+    Choice Single
+    ;</pre>
 
         <p><strong>Note: The question entry must have at least one answer, or else FeedBuzz will not accept it.</strong></p>
 
@@ -548,7 +548,8 @@ Question "What is 1+1?":
     Answer "0"
     Answer "1"
     Answer "2" Gain 1
-    Answer "3";</pre>
+    Answer "3"
+    ;</pre>
 
         </section>
 
