@@ -1,4 +1,4 @@
-from test import FeedBuzzQuestion, FeedBuzzAnswer
+from test import FeedBuzzQuestion, FeedBuzzAnswer, FeedBuzzScoreRange
 
 def __breakpoint():
     raise SystemExit("(program breakpoint)")
@@ -18,6 +18,7 @@ class ReaderState:
         # instead of having to go back by one character.
         state.last_character = ""
         state.test_line = -1
+        state.scoring_line = -1
         state.lineno = 0
 
 def character_is_newline(char):
@@ -31,7 +32,7 @@ def character_is_newline(char):
 
     return False
 
-def reader_count_newline(state, char):
+def reader_count_newline(state, char): # NOTE: misleading function name
     # windows applications for micr0$*ft
     if char == "\r":
         # print(f"reader_count_newline: <carriage return>")
@@ -69,15 +70,31 @@ def read_char_file_safe(state, file, bypass=False):
 
     return char
 
-def read_char_safe(state, file, bypass=False, skip_whitespace=False):
+def read_char_skip_comments(first_char, state, file, bypass=False, skip_comments=True):
+    if first_char != "#":
+        return first_char
+
+    while True:
+        char = read_char_file_safe(state, file, bypass)
+
+        if char == "\n":
+            reader_count_newline(state, char)
+            return read_char_file_safe(state, file, bypass) # the next character after \n
+
+    return first_char
+
+def read_char_skip_newline(first_char, state, file, bypass=False, skip_whitespace=True):
+
+def read_char_safe(state, file, bypass=False, skip_whitespace=False, skip_comments=True):
     char = read_char_file_safe(state, file, bypass)
+    char = read_char_skip_comments(char, state, file, bypass, skip_comments)
 
     if reader_count_newline(state, char) and skip_whitespace:
         while True:
             char = read_char_file_safe(state, file, bypass)
 
             if not reader_count_newline(state, char):
-                return char
+                return read_char_skip_comments(char, state, file, bypass, skip_comments)
 
     return char
 
@@ -105,6 +122,9 @@ def identifier_read(state, file, startchar):
 
 def reader_check_unexpected_characters(state, char):
     raise reader_error(state, f"Unexpected character: ({ord(char)}) {char}")
+
+def character_is_quote(character):
+    return character == "'" or character == '"'
 
 def reader_read_string(state, file, process_name=""):
     quote_char = read_char_safe(state, file, skip_whitespace=True)
@@ -136,12 +156,12 @@ def reader_read_string(state, file, process_name=""):
         elif char != "\r":
             string += char
 
-        char = read_char_safe(state, file)
+        char = read_char_safe(state, file, skip_comments=False)
 
         if char == "\n":
             raise reader_error(state, f"({process_name}) Newlines are not allowed in a string!")
 
-    print(string)
+    # print(string)
 
     return string
 
@@ -198,17 +218,31 @@ def reader_read_test(test, state, file):
         if identifier_is_valid(char):
             keyword = identifier_read(state, file, char)
 
-            if keyword == "Name":
-                name = reader_read_string(state, file, "Test.Name")
-                test.name = name
+            if keyword == "Title" or keyword == "Name":
+                title = reader_read_string(state, file, "Test.Title")
+                test.title = title
             elif keyword == "Description":
                 description = reader_read_string(state, file, "Test.Description")
                 test.description = description
             elif keyword == "TimeLimit":
                 time_limit = reader_read_integer(state, file, "Test.TimeLimit", positive_only=True)
                 test.time_limit = time_limit
+            elif keyword == "Deduction":
+                firstchar = read_char_safe(state, file, skip_whitespace=True)
+
+                if not identifier_is_valid(firstchar):
+                    raise reader_error(state, f"(Test.Deduction) 'Sparing' or 'Punishing' keyword expected")
+
+                value_keyword = identifier_read(state, file, firstchar)
+
+                if value_keyword == "Punishing":
+                    test.sparing = False
+                elif value_keyword == "Sparing":
+                    test.sparing = True
+                else:
+                    raise reader_error(state, f"(Test.Deduction) Keyword is not either 'Sparing' or 'Punishing'")
             else:
-                raise reader_error(state, f"Unknown keyword in Test entry: '{keyword}'")
+                raise reader_error(state, f"(Test) Unknown keyword: '{keyword}'")
         else:
             reader_check_unexpected_characters(state, char)
 
@@ -230,19 +264,19 @@ def reader_read_question(question, state, file, question_contents):
                 firstchar = read_char_safe(state, file, skip_whitespace=True)
 
                 if not identifier_is_valid(firstchar):
-                    raise reader_error(state, f"(Question.Choice) 'Single' or 'Multi' keyword expected")
+                    raise reader_error(state, f"(Question.Choice) 'Single' or 'Multiple' keyword expected")
 
                 value_keyword = identifier_read(state, file, firstchar)
 
                 if value_keyword == "Single":
                     question.multi_choice = False
-                elif value_keyword == "Multi":
+                elif value_keyword == "Multiple":
                     question.multi_choice = True
                 else:
-                    raise reader_error(state, f"(Question.Choice) Keyword is not either 'Single' or 'Multi'")
+                    raise reader_error(state, f"(Question.Choice) Keyword is not either 'Single' or 'Multiple'")
             elif keyword == "Answer":
                 answer_contents = reader_read_string(state, file, "Question.Answer")
-                answer = FeedBuzzAnswer(contents=answer_contents, description="", score=0)
+                answer = FeedBuzzAnswer(contents=answer_contents, description="", score=0, toggled=False)
                 answers.append(answer)
             elif keyword == "Gain":
                 if answer is None:
@@ -255,11 +289,24 @@ def reader_read_question(question, state, file, question_contents):
 
                 answer.score = -reader_read_integer(state, file, "Question.Answer.Loss", positive_only=True)
             else:
-                raise reader_error(state, f"Unknown keyword in Question entry: '{keyword}'")
+                raise reader_error(state, f"(Question) Unknown keyword: '{keyword}'")
         else:
             reader_check_unexpected_characters(state, char)
 
-def reader_read_range(test, state, file):
+
+def reader_read_scoring_check(state, scorerange, process=""):
+    if scorerange is None:
+        raise reader_error(state, f"({process}) A score range has not yet been defined.")
+
+def reader_read_scoring(test, state, file):
+    # OLD: Define [At [score] [Top?]] [Last?] -> [Description [contents]]
+    # At [[score] [Top?]]|[Last?] -> [Description [contents]]
+
+    ranges = test.ranges
+    after_at = False
+    reader_signify_data_container(state, file, "Scoring")
+    scorerange = None
+
     while True:
         char = read_char_safe(state, file, skip_whitespace=True)
 
@@ -267,7 +314,30 @@ def reader_read_range(test, state, file):
             return
 
         if identifier_is_valid(char):
-            pass
+            keyword = identifier_read(state, file, char)
+
+            if keyword == "At":
+                scorerange = FeedBuzzScoreRange()
+                ranges.append(scorerange)
+
+                reader_read_scoring_check(state, scorerange, "Scoring.At")
+                scorerange.at = reader_read_integer(state, file, "Scoring.At", positive_only=True)
+                after_at = True
+            else:
+                raise reader_error(state, f"(Scoring) Unknown keyword: '{keyword}'")
+        elif character_is_quote(char):
+            if not after_at:
+                raise reader_error(state, f"(Scoring) Score range description must be after an 'At' position.")
+
+            reader_read_scoring_check(state, scorerange, "Scoring.[quotestring]")
+            reader_hand_character(state, char)
+
+            description = reader_read_string(state, file, "Scoring")
+            scorerange.description = description
+
+            after_at = False
+        elif character_is_numerical(char):
+            raise reader_error(state, "(Scoring) Unexpected number not after 'At'")
         else:
             reader_check_unexpected_characters(state, char)
 
@@ -290,6 +360,12 @@ def root_nest_identify_keyword(test, state, file, keyword):
 
         state.test_line = state.lineno
         reader_read_test(test, state, file)
+    elif keyword == "Scoring":
+        if state.scoring_line >= 0:
+            raise reader_error(state, f"Attempted to declare another scoring entry; scoring is first declared at line {state.scoring_line+1}")
+
+        state.scoring_line = state.lineno
+        reader_read_scoring(test, state, file)
     else:
         raise reader_error(state, f"Unrecognized data entry '{keyword}'; Test, Result, or Question expected.")
 

@@ -47,7 +47,7 @@
                 text-decoration: underline;
             }
 
-            section > h4
+            section#syntax > h4
             {
                 border-top: 1px solid white;
                 padding-top: 8px;
@@ -104,6 +104,7 @@
                 <li><a href="#setup">Setup</a></li>
                 <li><a href="#usage">Usage</a></li>
                 <li><a href="#presets">Presets</a></li>
+                <li><a href="#wizard">Test Making Wizard</a></li>
                 <li><a href="#scoring">Scoring System</a></li>
                 <li><a href="#syntax">FeedBuzz Lingo</a></li>
                 <li><a href="#json">JSON Result Data</a></li>
@@ -199,51 +200,45 @@ feedbuzz [input file] [--output output_file] [--raw]
             </p>
         </section>
 
-        <header>Scoring</header>
-        <section id="scoring">
+        <header>Test Making Wizard</header>
+        <section id="wizard">
             <p>
-                The scoring system allows you to configure if the <a href="#syntax_deduction">deduction mechanic is punishing or sparing.</a>
-
-                If a score is almost to zero and the penalty of an answer is greater than the score, the scoring system will always push it
-                to zero.
+                The test making wizard provides a simple way for any user to make tests, thus it is user-friendly. (Yet
+                not enough because most people do not know how to use a terminal, but anyways.)
             </p>
 
-            <h4>Punishing Deduction</h4>
-
             <p>
-                For a single-choice question, a wrong answer will penalize your score.
-                <br>
-                For a multiple-choice question, the total score of all selected choices will penalize your score if the losses overweigh.
-
-                <pre>
-Question "What can be 10?":
-    Choice Multiple
-    Answer "8 + 2" Gain 1
-    Answer "2 + 1" Loss 1 # selected
-    Answer "9 + 8" Loss 1 # selected
-    Answer "5 + 7" Loss 1; # selected
-
-# this means the total penalty of 3</pre>
+                To get started, run <code>python main.py --wizard</code>. This enters the wizard.
             </p>
 
-            <h4>Sparing Deduction</h4>
+            <pre>
+======= FeedBuzz =======
+The test making wizard greets you!
 
-            <p>For a progressive score system in your test, consider only having answer penalties in multiple-choice questions.<p>
+- Type a keyword to select:
+               new) Make a new fresh test.
+              save) Save the test to a file.
+
+            select) Select a question or a result range.
+              view) View the selected question or result range.
+              edit) Edit the selected question or result range.
+
+         calculate) Calculate the highest and lowest possible points.
+            ranges) View the result score ranges in order.
+
+              name) Set the name of the test.
+         timelimit) Impose a time limit for the test.
+
+         reference) Show this keyword reference message.
+
+keyword>_</pre>
 
             <p>
-                For a single-choice question, a wrong answer will still penalize your score.
-                <br>
-                For a multiple-choice question, the total score of all selected choices have no penalty if losses overweigh.
+                (TODO) Inputing a time limit to impose should require something like `4m5s39h`
+            </p>
 
-                <pre>
-Question "What can be 10?":
-    Choice Multiple
-    Answer "8 + 2" Gain 1
-    Answer "2 + 1" Loss 1 # selected
-    Answer "9 + 8" Loss 1 # selected
-    Answer "5 + 7" Loss 1; # selected
-
-# this means no penalty because the test has a sparing deduction mechanic.</pre>
+            <p>
+                Here the wizard greets you with a selection of choices. Type one of the keywords before the <code>)</code> sign.
             </p>
         </section>
 
@@ -254,6 +249,10 @@ Question "What can be 10?":
                 is simple to learn as the syntax is self-descriptive. This is the language all input files should be written in.
             </p>
 
+            <p>
+                This section is for advanced users. If you want an easy way to make tests, instead use the <a href="#wizard">test making wizard</a>.
+            </p>
+
             <h4>Parts</h4>
             <ol>
                 <li><a href="#syntax_sample">Sample File</a></li>
@@ -262,7 +261,7 @@ Question "What can be 10?":
                 <li><a href="#syntax_comments">Comments</a></li>
                 <li><a href="#syntax_structure">File Structure</a></li>
                 <li><a href="#syntax_test">Test Metadata</a></li>
-                <li><a href="#syntax_judgment">Judgment Data</a></li>
+                <li><a href="#syntax_result">Result Entry</a></li>
                 <li><a href="#syntax_question">Question Entry</a></li>
             </ol>
 
@@ -272,10 +271,12 @@ Test:
     Name "Sample Test"
     TimeLimit 120;
 
-Scoring:
-    At 2 "Good enough I guess."
-    At 1 "Cringe"
-    Last "No common sense you have";
+Result 2,0:
+    Grade "Cringe"
+    Description "No common sense you have";
+Result 0,2:
+    Grade "Good"
+    Description "Good enough I guess";
 
 Question "Which poison would you pick?":
     Choice Single
@@ -372,7 +373,6 @@ Question "QuestionX":
 Test:
     Name "Test Name"
     Description "Test description"
-    Deduction Sparing
     TimeLimit 0;</pre>
 
         <ul>
@@ -422,56 +422,69 @@ Test:
                     </li>
                 </ul>
             </li>
-            <li id="syntax_deduction">
-                <code>Deduction [gracefulness]</code>
-                |
-                Impose the time limit in seconds. Set to 0 to impose unlimited time.
-                <ul>
-                    <li>
-                        <code>[gracefulness]</code>
-                        |
-                        <em>positive integer</em>
-                    </li>
-                </ul>
-            </li>
         </ul>
 
-        <h4 id="syntax_judgment">Judgment Data</h4>
+        <h4 id="syntax_result">Result Entry</h4>
 
-        <p>The labeling of score ranges. You can only declare it once. If the scoring range positions are out of order, FeedBuzz will sort them.</p>
+        <p>The description of a score range.</p>
 
         <pre>
-Scoring:
-    At 4 "A score at least more than 4 is displayed"
-    At 2 "A score at least more than 2 is displayed"
-    Last "A score below anything above is displayed";</pre>
+# default values when unspecified
+
+Result 0, 0:
+    Grade "GradeName"
+    Description "Result Description";</pre>
 
         <ul>
             <li>
-                <code>Scoring:</code>
+                <code>Result [range/type]:</code>
                 |
-                <strong>Scoring data</strong>
+                <strong>Declaration of a result entry</strong>
                 <ul>
                     <li>
-                        <code>At [point] [description?]</code>
-                        |
-                        Pinpoint a score range starting with <code>[point]</code>
+                        <code>[range/type]</code>
+                        can be the following:
+
                         <ul>
                             <li>
-                                <code>[point]</code>
+                                <em>range</em>
                                 |
-                                <em>number</em>
+                                <code>[range start], [range end]</code>
                                 |
-                                A requirement if a score is at least the amount of it.
+                                <em>integer, integer</em>
+                                |
+                                Place this result on a score range. [inclusive, exclusive)
                             </li>
                         </ul>
-                    </li>
-                    <li>
-                        <code>Last [description?]</code>
                     </li>
                 </ul>
             </li>
 
+            <li>
+                <code>Grade "[name]"</code>
+                |
+                Describe the name of this result like a grade.
+                <ul>
+                    <li>
+                        <code>[name]</code>
+                        |
+                        <em>quoted string</em>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <code>Description "[description]"</code>
+                |
+                Describe the name of this result like a grade.
+                <ul>
+                    <li>
+                        <code>[description]</code>
+                        |
+                        <em>quoted string</em>
+                    </li>
+                </ul>
+            </li>
         </ul>
 
         <h4 id="syntax_question">Question Entry</h4>
@@ -524,6 +537,18 @@ Question "[question name placeholder]":
                 </ul>
             </li>
             <li>
+                <code>Explain [explanation]</code>
+                |
+                Explain the last declared answer when it is selected. Shown according to the <code>Explanations</code> attribute from <code>Test</code>
+                <ul>
+                    <li>
+                        <code>[explanation]</code>
+                        |
+                        <em>quoted string</em>
+                    </li>
+                </ul>
+            </li>
+            <li>
                 <code>Choice [type]</code>
                 |
                 Make the question single or multiple choice.
@@ -549,6 +574,22 @@ Question "What is 1+1?":
     Answer "1"
     Answer "2" Gain 1
     Answer "3";</pre>
+
+        <pre>
+Question "What can be 2?":
+    Choice Multiple
+
+    Answer "9 - 6" Loss 1
+    Explain "9 - 6 equals 3"
+
+    Answer "3 - 1" Gain 1
+    Explain "3 - 1 equals 2"
+
+    Answer "1 + 3" Loss 1
+    Explain "1 + 3 equals 4"
+
+    Answer "5 - 3" Gain 1
+    Explain "5 - 3 equals 2";</pre>
 
         </section>
 
