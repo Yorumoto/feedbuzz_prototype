@@ -651,12 +651,33 @@ Question "What is 1+1?":
                         <li>
                             <ul>
                                 <li>
+                                    <code>contents</code>
+                                    |
+                                    string
+                                    |
+                                    The title of the question
+                                </li>
+                                <li>
+                                    <code>multi_choice</code>
+                                    |
+                                    boolean
+                                    |
+                                    If the question is multi-choice. False if it is not multi-choice.
+                                </li>
+                                <li>
                                     <code>answers</code>
                                     |
                                     array
                                     |
                                     An array of answers in the question
                                     <ul>
+                                        <li>
+                                            <code>contents</code>
+                                            |
+                                            string
+                                            |
+                                            The contents of the answer shown under the question.
+                                        </li>
                                         <li>
                                             <code>score</code>
                                             |

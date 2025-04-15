@@ -4,4 +4,4 @@ __pycache__
 pyvenv.cfg
 include/
 lib/
-
+*.zip

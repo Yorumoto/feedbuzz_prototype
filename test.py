@@ -323,7 +323,7 @@ def player_display_question(idx, question):
 
     clearline()
     if multi_choice:
-        terminal_italic("      (multiple-choice)")
+        terminal_italic("      (you can choose more than 1 answer at once)")
         print()
     else:
         print()
@@ -339,8 +339,11 @@ def player_display_question(idx, question):
         print(" ", end="")
         print(answer.contents)
 
+    print()
+
     clearline()
-    terminal_italic("Pick or erase with an answer number. Type 'done' if you are done answering.")
+    terminal_italic("Choose an answer by selecting a number, then press ENTER. Then, type 'd' and ENTER if you are done.")
+    print()
     print()
 
 def player_finish_test(test, player):
@@ -379,8 +382,6 @@ def player_show_statistics(test, player):
     print()
     print()
 
-    # TODO: remind player of score and time, that's all!
-
 def carriage_up(up=0):
     print(f"\r\033[{up}A", end="")
 
@@ -406,13 +407,13 @@ def player_confront(test, player):
             clearline()
             answer_input = input("\rYour answer: ").strip().lower()
 
-            if answer_input == "done":
+            if answer_input == "d":
                 if not question_marked(question):
                     clearline()
                     terminal_bold("!! ")
                     print("No answers selected, at least pick one answer.")
 
-                    carriage_up(answerlen+5)
+                    carriage_up(answerlen+7)
                     continue
 
                 player.current += 1
@@ -425,7 +426,7 @@ def player_confront(test, player):
                 terminal_bold("!! ")
 
                 print("Not a number.")
-                carriage_up(answerlen+5)
+                carriage_up(answerlen+7)
 
                 continue
 
@@ -434,7 +435,7 @@ def player_confront(test, player):
                 terminal_bold("!! ")
 
                 print("Answer number exceeds below 1, type blank to see the question again.")
-                carriage_up(answerlen+5)
+                carriage_up(answerlen+7)
                 continue
 
             if answer_idx > len(answers):
@@ -442,7 +443,7 @@ def player_confront(test, player):
                 terminal_bold("!! ")
 
                 print(f"Answer number exceeds above {len(answers)}, type blank to see the question again.")
-                carriage_up(answerlen+5)
+                carriage_up(answerlen+7)
 
                 continue
 
@@ -456,7 +457,7 @@ def player_confront(test, player):
                     question_answer.toggled = False
                 answer.toggled = True
 
-            carriage_up(answerlen+4)
+            carriage_up(answerlen+6)
         except KeyboardInterrupt:
             terminal_marked(" interrupt detected, quitting test ")
             return False
