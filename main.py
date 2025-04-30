@@ -108,10 +108,8 @@ def main(argv):
     test = FeedBuzzTest(title="", description="", questions=[], ranges=[])
 
     with open(opts.input, "r") as test_file:
-        feedbuzz_file_read(test, test_file)
         try:
-            pass
-            # feedbuzz_file_read(test, test_file)
+            feedbuzz_file_read(test, test_file)
         except ReaderSyntaxError as e:
             print(f"{CODENAME}: {e}", file=stderr)
             return 1

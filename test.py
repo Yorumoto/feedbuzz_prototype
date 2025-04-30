@@ -475,7 +475,7 @@ def test_results_json(test, player):
 
     overdue, _ = player_is_overdue(test, player)
 
-    metadata = dict(name=test.title, description=test.description, 
+    metadata = dict(title=test.title, description=test.description, 
                     time_limit=test.time_limit)
 
     time = dict(started=datetime_json(player.time_start), 
