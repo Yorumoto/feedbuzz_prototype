@@ -1,6 +1,5 @@
 bin/
 __pycache__
-*.q
 pyvenv.cfg
 include/
 lib/
