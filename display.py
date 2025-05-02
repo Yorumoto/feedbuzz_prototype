@@ -172,10 +172,10 @@ def refresh_test_beginning(window, test):
 
     fill_rectangle(window, cy, cx, cy+12, cx+40, attribs)
 
-    if not test.name:
+    if not test.title:
         window.addstr(cy+1, cx+1, "(Untitled Test)", attribs | A_BOLD)
     else:
-        window.addstr(cy+1, cx+1, test.name[:38], attribs | A_BOLD)
+        window.addstr(cy+1, cx+1, test.title[:38], attribs | A_BOLD)
 
     cy += 1
 

@@ -92,6 +92,12 @@ def test_start(opts, test, player):
     except (FileNotFoundError, PermissionError, OSError) as e:
         print(f"Failed to write results in JSON to {opts.output} ({e})")
 
+def test_start_CURSES(win, opts, test, player):
+    from display import feedbuzz_display_setup, feedbuzz_display_test_beginning
+
+    feedbuzz_display_setup(win)
+    feedbuzz_display_test_beginning(win, test)
+
 def main(argv):
     opts = Opts(input="", output="a.json")
 
@@ -153,7 +159,10 @@ def main(argv):
         return 0
 
     player = FeedBuzzPlayer(test)
-    test_start(opts, test, player)
+    # test_start(opts, test, player)
+
+    from curses import wrapper
+    wrapper(test_start_CURSES, opts, test, player)
 
     return 0
 

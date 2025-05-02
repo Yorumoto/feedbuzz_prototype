@@ -95,7 +95,7 @@
         <header>Contents</header>
         <section>
             <ol>
-                <li><a href="#introduction">What is this?</a></li>
+                <li><a href="#introduction">Introduction</a></li>
                 <li><a href="#setup">Setup</a></li>
                 <li><a href="#usage">Usage</a></li>
                 <li><a href="#presets">Presets</a></li>
@@ -106,15 +106,12 @@
             </ol>
         </section>
 
-        <header>What is this?</header>
+        <header>Introduction</header>
         <section id="introduction">
             <p>
-                In short, this is a program that scores the answers from questions. It takes a Feedbuzz File,
-                and exports a barebones PDF file (<a href="#pdf_support">if supported.</a>) It adjusts the score
-                of the weight of an answer a taker picks, and it describes the range of the score.
-            </p>
-
-            <p>
+                In short, FeedBuzz is a console test-taking program. It takes a Feedbuzz File,
+                and exports test scoring data. An answer can weigh how much it rewards and penalizes the oveall 
+                test score.
             </p>
         </section>
 
@@ -147,23 +144,22 @@ feedbuzz [input file] [--output output_file] [--maximum] [--ranges] [--questions
             <ul>
                 <li>
                     <code>[input file]</code>
-                    Take an input file in <a href="#syntax">Feedbuzz Lingo.</a>
+                    Take an <a href="#syntax">Feedbuzz Lingo</a> input file.
                 </li>
 
                 <li>
                     <code>--output output_file</code>
-                    Output a file named <em>output_file</em>. If left unspecified, it will output a file named, <em>results.pdf</em> 
-                    or <em>results.json</em>.
+                    Output a file with the name <em>output_file</em>. If left unspecified, it will output a file named <em>results.json</em>.
                 </li>
 
                 <li>
                     <code>--maximum</code>
-                    Get the maximum possible points achieved in a test.
+                    Calculate the maximum possible points in a test.
                 </li>
 
                 <li>
                     <code>--ranges</code>
-                    List all the judgment scoring ranges in a test.
+                    List all the judgment ranges in a test.
                 </li>
 
                 <li>
@@ -173,7 +169,7 @@ feedbuzz [input file] [--output output_file] [--maximum] [--ranges] [--questions
 
                 <li>
                     <code>--help</code>
-                    Show brief help message.
+                    Show a brief help message.
                 </li>
             </ul>
         </section>
@@ -184,24 +180,37 @@ feedbuzz [input file] [--output output_file] [--maximum] [--ranges] [--questions
                 Feedbuzz bundles with a few presets, which you can find them at the presets folder.
             </p>
 
-            <h4>presets/</h4>
+            <h4>presets/business.q</h4>
+
+            <p>
+                A test examining entruprenuerial traits.
+            </p>
+
+            <h4>presets/demo.q</h4>
+
+            <p>
+                A test showcasing the basic features of FeedBuzz.
+            </p>
+
+            <h4>presets/grit.q</h4>
+
+            <p>
+                A test based on the Grit Scale by Angela Duckworth.
+            </p>
         </section>
 
         <header>Scoring</header>
         <section id="scoring">
             <p>
-                The scoring system allows you to configure if the <a href="#syntax_deduction">deduction mechanic is punishing or sparing.</a>
-
-                If a score is almost to zero and the penalty of an answer is greater than the score, the scoring system will always push it
-                to zero.
+                The scoring system is customizable <a href="#syntax_deduction">with the <code>Deduction</code> attribute.</a>
+                A score cannot be negative but instead clamped to zero.
             </p>
 
-            <h4>Punishing Deduction</h4>
+            <h4>Punishing Scoring</h4>
 
             <p>
-                For a single-choice question, a wrong answer will penalize your score.
-                <br>
-                For a multiple-choice question, the total score of all selected choices will penalize your score if the losses overweigh.
+                Single-choice questions will lower your test score from a wrong answer.
+                Multiple-choice questions will lower your test score if losses overweigh.
 
                 <pre>
 Question "What can be 10?":
@@ -212,17 +221,16 @@ Question "What can be 10?":
     Answer "5 + 7" Loss 1 # selected
     ;
 
-# this means the total penalty of 3</pre>
+# This has a total penalty of 3</pre>
             </p>
 
-            <h4>Sparing Deduction</h4>
+            <h4>Sparing Scoring</h4>
 
-            <p>For a progressive score system in your test, consider only having answer penalties in multiple-choice questions.<p>
+            <p><em>To make a progressive score system in your test, only use penalties in multiple-choice questions.</em><p>
 
             <p>
-                For a single-choice question, a wrong answer will still penalize your score.
-                <br>
-                For a multiple-choice question, the total score of all selected choices have no penalty if losses overweigh.
+                Single-choice questions are the same as in a test with punishing scoring unlike multiple-choice questions.
+                If losses overweigh, multiple-choice questions have no reward and no loss.
 
                 <pre>
 Question "What can be 10?":
@@ -233,21 +241,23 @@ Question "What can be 10?":
     Answer "5 + 7" Loss 1 # selected
     ;
 
-# this means no penalty because the test has a sparing deduction mechanic.</pre>
+# This has no penalty because the test uses the sparing scoring system.</pre>
             </p>
         </section>
 
         <header>FeedBuzz Lingo</header>
         <section id="syntax">
             <p>
-                Feedbuzz uses a descriptive language to gather test metadata and to run questions. The language
-                is simple to learn as the syntax is self-descriptive. This is the language all input files should be written in.
+                Feedbuzz has a descriptive language to run questions. The language
+                is simple to learn as the syntax is self-descriptive. All input files should be written in Feedbuzz Lingo.
             </p>
+
+            <p>The typical file format of a FeedBuzz Lingo file ends with ".q" standing for questions.<p>
 
             <h4>Parts</h4>
             <ol>
                 <li><a href="#syntax_sample">Sample File</a></li>
-                <li><a href="#syntax_nested_pattern">Nested Pattern</a></li>
+                <li><a href="#syntax_section_pattern">Section Pattern</a></li>
                 <li><a href="#syntax_strings">Quoted Strings</a></li>
                 <li><a href="#syntax_comments">Comments</a></li>
                 <li><a href="#syntax_structure">File Structure</a></li>
@@ -285,26 +295,30 @@ Question "What is not the third color of the rainbow?":
     Answer "green" Loss 1
     ;</pre>
 
-        <h4 id="syntax_nested_pattern">Nested Pattern</h4>
+        <h4 id="syntax_section_pattern">Section Pattern</h4>
 
-        <p>The language has a pattern to describe data. Depending on the data, it goes something like this:</p>
+        <p>This pattern is to describe a section, and below is the layout.</p>
         <pre>
-DataName [DataValues]:
+HeaderName [HeaderValues]:
     Attribute AttributeValue
     Attribute2 AttributeValue2
     ;</pre>
 
-        <p>Indicate a colon after the values of data to begin listing attributes. 
-        Indicate a semicolon to stop the attribute list. Although use consistent indentation for 
-        clear lists when writing attributes, whitespace does not matter when read.
+        <p>
+            Start defining attributes with a colon after the data header.
+            End a section with a semicolon.
         </p>
 
-        <code>Test: Name "One Line Sample";</code>
+        <p>NOTE: <em> Although Feedbuzz ignores whitespace, keep indentation consistent.</em></p>
+
+        <code>Test: Title "One Line Sample";</code>
 
         <h4 id="syntax_strings">Quoted Strings</h4>
 
-        <p>Quoted strings can be double-quoted or single-quoted. Use backticks to allow quotes, that would be confused
-        with another string, in quoted strings.</p>
+        <p>
+            Strings of text can have double or single quotes in between, and the quotes must be the same.
+            To put quotations in strings without confusing Feedbuzz, place a backtick before a quote.
+        </p>
 
         <pre>
 Question "Sample":
@@ -315,7 +329,7 @@ Question "Sample":
 
         <h4 id="syntax_comments">Comments</h4>
 
-        <p>Like writing code, the language supports one-line comments beginning with a hashtag.</p>
+        <p>Like Python, begin a one-line comment with a hashtag.<p>
 
         <pre>
 # This is a weird question.
@@ -330,14 +344,19 @@ Question "Do you support [insert controversial policy here]?":
 
         <h4 id="syntax_structure">File Structure</h4>
 
-        <p>You have only one <code>Test</code> data entry. You are welcome to have as many questions with many answers, as you like.
-        You can have as many score-ranged result descriptions as you like. This is all on the same indentation. <em>However,</em> the location of the question entries define the order of the questions. The ranged result descriptions are sorted by the starting point.</p>
+        <p>
+            A file can only have one <code>Test</code> and one <code>Scoring</code> entry. You can have as many questions and judgments as you like.
+            <em>However, the location of the questions define the order.</em> Judgment descriptions are sorted with their level, but keep it readable
+            by manually sorting.
+        <p>
 
-        <p>The typical file format of a FeedBuzz Lingo file ends with ".q" standing for questions.<p>
 
         <pre>
 Test:
     # test data here
+    At 5 "Level 5"
+    At 10 "Level 10" # This should be on top of level 5
+    At 0 "Level 0"
     ;
 
 Scoring:
@@ -359,7 +378,7 @@ Question "QuestionX":
 
         <h4 id="syntax_test">Test Data</h4>
 
-        <p>The basis of a FeedBuzz Lingo file. You can only declare it once.</p>
+        <p>This is the basis of a FeedBuzz Lingo file. You can only declare it once.</p>
 
         <pre>
 # default values when unspecified
@@ -381,12 +400,12 @@ Test:
 
                 <ul>
                     <li>
-                        <code>Name [name]</code>
+                        <code>Title [title]</code>
                         |
-                        Name the test with a proper name.
+                        The title of a test.
                         <ul>
                             <li>
-                                <code>[name]</code>
+                                <code>[title]</code>
                                 |
                                 <em>quoted string</em>
                             </li>
@@ -395,7 +414,7 @@ Test:
                     <li>
                         <code>Description [description]</code>
                         |
-                        Give the test a description.
+                        The description of a test.
                         <ul>
                             <li>
                                 <code>[description]</code>
@@ -409,7 +428,7 @@ Test:
             <li>
                 <code>TimeLimit [seconds]</code>
                 |
-                Impose the time limit in seconds. Set to 0 to impose unlimited time.
+                The time limit of a test in seconds. Set to zero to impose unlimited time.
                 <ul>
                     <li>
                         <code>[seconds]</code>
@@ -419,14 +438,14 @@ Test:
                 </ul>
             </li>
             <li id="syntax_deduction">
-                <code>Deduction [gracefulness]</code>
+                <code>Deduction [difficulty]</code>
                 |
-                Impose the time limit in seconds. Set to 0 to impose unlimited time.
+                The scoring system difficulty of a test.
                 <ul>
                     <li>
-                        <code>[gracefulness]</code>
+                        <code>[difficulty]</code>
                         |
-                        <em>positive integer</em>
+                        <em>Sparing</em>
                     </li>
                 </ul>
             </li>
@@ -434,7 +453,7 @@ Test:
 
         <h4 id="syntax_judgment">Judgment Data</h4>
 
-        <p>The labeling of score ranges. You can only declare it once. If the scoring range positions are out of order, FeedBuzz will sort them.</p>
+        <p>This is the end result messages of a test. Feedbuzz will sort the positions if out of order, though it is best to keep things readable by manually sorting.</p>
 
         <pre>
 Scoring:
@@ -452,7 +471,7 @@ Scoring:
                     <li>
                         <code>At [point] [description?]</code>
                         |
-                        Pinpoint a score range starting with <code>[point]</code>
+                        Pinpoint a message starting with <code>[point]</code>
                         <ul>
                             <li>
                                 <code>[point]</code>
@@ -466,12 +485,12 @@ Scoring:
                 </ul>
             </li>
 
-            <p>You can always look how FeedBuzz is treating the judgment data by running <code>feedbuzz [input file] --ranges</code></p>
+            <p>You can look how FeedBuzz reads judgment data by running <code>feedbuzz [input file] --ranges</code></p>
         </ul>
 
         <h4 id="syntax_question">Question Entry</h4>
 
-        <p>The basis of a question.</p>
+        <p>This is the basis of a question.</p>
 
         <pre>
 # default values when unspecified
@@ -480,32 +499,32 @@ Question "[question name placeholder]":
     Choice Single
     ;</pre>
 
-        <p><strong>Note: The question entry must have at least one answer, or else FeedBuzz will not accept it.</strong></p>
+        <p><strong>Note: The question entry must have at least one answer, otherwise FeedBuzz will not accept it.</strong></p>
 
         <ul>
             <li>
-                <code>Answer "[answer contents]" [consequence?] [score?]</code>
+                <code>Answer "[answer contents]" [effect?] [score?]</code>
                 |
-                Add an answer to the question.
+                Adds an answer to the question.
                 <ul>
                     <li>
                         <code>[answer contents]</code>
                         |
                         <em>quoted string</em>
                         |
-                        Describe the contents of an answer
+                        The contents of an answer
                     </li>
                     <li>
                         Scoring (Optional) (If left unspecified, this has no reward or penalty)
                         <ul>
                             <li>
-                                <code>[consequence]</code>
+                                <code>[effect]</code>
                                 |
                                 <code>Gain</code>
                                 <em>or</em>
                                 <code>Loss</code>
                                 |
-                                Choose the consequence of an answer when selected
+                                The scoring effect of an answer
                             </li>
 
                             <li>
@@ -513,7 +532,7 @@ Question "[question name placeholder]":
                                 |
                                 <em>positive integer</em>
                                 |
-                                Reward the consequence by this amount
+                                The weight of the effect of an answer
                             </li>
                         </ul>
                     </li>
@@ -522,7 +541,7 @@ Question "[question name placeholder]":
             <li>
                 <code>Choice [type]</code>
                 |
-                Make the question single or multiple choice.
+                Make the question have one or many choices selected at once.
                 <ul>
                     <li>
                         <code>[type]</code>
@@ -558,11 +577,11 @@ Question "What is 1+1?":
                     <code>metadata</code>
                     <ul>
                         <li>
-                            <code>name</code>
+                            <code>title</code>
                             |
                             string
                             |
-                            The name of the test taken.
+                            The title of the test taken.
                         </li>
 
                         <li>
@@ -701,9 +720,11 @@ Question "What is 1+1?":
         <header>Visions</header>
         <section id="visions">
             <p>
-                This is the only beginning, this is a prototype that gets the idea done.
-                We have visions of shaping this into a polished web application. Perhaps a service platform, despite being despicably similar to a <a class="shhh" href="https://www.buzzfeed.com/quizzes">certain platform if you think too hard at the program name.</a>
-                To make it user-friendly enough, I have plans to rebuild this with different interfaces to have the same system.
+                This is the only beginning, and it is a prototype that gets the idea done.
+                We have visions of shaping this to a polished web application for user convenience. Perhaps a service platform, despite being despicably similar to a <a class="shhh" href="https://www.buzzfeed.com/quizzes">certain platform if you think too hard at the program name</a> and <a class="shhh" href="https://www.qualtrics.com/"> another platform for the same purpose.</a>
+                I don't think the laymen would use this if this console application released today.
+                <br>
+                <br>
                 For now, this is a passion project made for a family member and for a school project.
             </p>
         </section>
