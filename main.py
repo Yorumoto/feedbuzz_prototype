@@ -159,10 +159,7 @@ def main(argv):
         return 0
 
     player = FeedBuzzPlayer(test)
-    # test_start(opts, test, player)
-
-    from curses import wrapper
-    wrapper(test_start_CURSES, opts, test, player)
+    test_start(opts, test, player)
 
     return 0
 
