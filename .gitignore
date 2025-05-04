@@ -4,3 +4,7 @@ pyvenv.cfg
 include/
 lib/
 *.zip
+README.pdf
+README_pdf.pdf
+README_pdf.html
+README_with_wizard.html
